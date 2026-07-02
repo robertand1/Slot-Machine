@@ -13,6 +13,24 @@ function updateBalance(target) {
   document.getElementById("balance").innerText = balance;
 }
 
+function getRandomSymbol() {
+  return symbols[Math.floor(Math.random() * symbols.length)];
+}
+
+function getElements() {
+  return {
+    r1Top: document.getElementById("r1-top"),
+    r1Mid: document.getElementById("r1-mid"),
+    r1Bot: document.getElementById("r1-bot"),
+    r2Top: document.getElementById("r2-top"),
+    r2Mid: document.getElementById("r2-mid"),
+    r2Bot: document.getElementById("r2-bot"),
+    r3Top: document.getElementById("r3-top"),
+    r3Mid: document.getElementById("r3-mid"),
+    r3Bot: document.getElementById("r3-bot"),
+  };
+}
+
 function spin() {
   if (isSpinning || balance < 10) {
     return;
@@ -21,20 +39,22 @@ function spin() {
   document.getElementById("spinBtn").disabled = true;
   showMessage("Spinning...");
   updateBalance(balance - 10);
-  const r1 = document.getElementById("r1");
-  const r2 = document.getElementById("r2");
-  const r3 = document.getElementById("r3");
-  function changeSimboluri() {
-    r1.innerText = symbols[Math.floor(Math.random() * symbols.length)];
-    r2.innerText = symbols[Math.floor(Math.random() * symbols.length)];
-    r3.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+  const elements = getElements();
+  function changeSymbols() {
+    for (let key in elements) {
+      elements[key].innerText = getRandomSymbol();
+    }
   }
-  const rollInterval = setInterval(changeSimboluri, 80);
-  function opresteRolele() {
+  const rollInterval = setInterval(changeSymbols, 80);
+  function stopReels() {
     clearInterval(rollInterval);
-    checkWin(r1.innerText, r2.innerText, r3.innerText);
+    checkWin(
+      elements.r1Mid.innerText,
+      elements.r2Mid.innerText,
+      elements.r3Mid.innerText,
+    );
   }
-  setTimeout(opresteRolele, 1500);
+  setTimeout(stopReels, 1500);
 }
 
 function checkWin(v1, v2, v3) {
@@ -46,10 +66,10 @@ function checkWin(v1, v2, v3) {
   }
   isSpinning = false;
   if (balance < 10) {
-    function avertizareFonduri() {
+    function warnFunds() {
       showMessage("OUT OF FUNDS!");
     }
-    setTimeout(avertizareFonduri, 1000);
+    setTimeout(warnFunds, 1000);
   } else {
     document.getElementById("spinBtn").disabled = false;
   }

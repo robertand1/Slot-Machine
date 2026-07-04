@@ -40,39 +40,37 @@ function spin() {
   showMessage("Spinning...");
   updateBalance(balance - 10);
   const elements = getReelElements();
-  let currentDelay = 40;
-  let spinCount = 0;
-  const maxSpins = 25;
-  function spinTick() {
-    elements.r1Bot.innerText = elements.r1Mid.innerText;
-    elements.r1Mid.innerText = elements.r1Top.innerText;
-    elements.r1Top.innerText = getRandomSymbol();
-
-    elements.r2Bot.innerText = elements.r2Mid.innerText;
-    elements.r2Mid.innerText = elements.r2Top.innerText;
-    elements.r2Top.innerText = getRandomSymbol();
-
-    elements.r3Bot.innerText = elements.r3Mid.innerText;
-    elements.r3Mid.innerText = elements.r3Top.innerText;
-    elements.r3Top.innerText = getRandomSymbol();
-    ++spinCount;
-    if (spinCount > 15) {
-      currentDelay += 30;
+  function animateReel(topEl, midEl, botEl, totalDuration, isLastReel) {
+    let currentDelay = 50;
+    let elapsedTime = 0;
+    function tick() {
+      botEl.innerText = midEl.innerText;
+      midEl.innerText = topEl.innerText;
+      topEl.innerText = getRandomSymbol();
+      elapsedTime += currentDelay;
+      if (elapsedTime > totalDuration - 500) {
+        currentDelay += 20;
+      }
+      if (elapsedTime < totalDuration) {
+        setTimeout(tick, currentDelay);
+      } else {
+        if (isLastReel) {
+          checkWin();
+        }
+      }
     }
-    if (spinCount < maxSpins) {
-      setTimeout(spinTick, currentDelay);
-    } else {
-      checkWin(
-        elements.r1Mid.innerText,
-        elements.r2Mid.innerText,
-        elements.r3Mid.innerText,
-      );
-    }
+    setTimeout(tick, currentDelay);
   }
-  setTimeout(spinTick, currentDelay);
+  animateReel(elements.r1Top, elements.r1Mid, elements.r1Bot, 1000, false);
+  animateReel(elements.r2Top, elements.r2Mid, elements.r2Bot, 1500, false);
+  animateReel(elements.r3Top, elements.r3Mid, elements.r3Bot, 2000, true);
 }
 
-function checkWin(v1, v2, v3) {
+function checkWin() {
+  const elements = getReelElements();
+  const v1 = elements.r1Mid.innerText;
+  const v2 = elements.r2Mid.innerText;
+  const v3 = elements.r3Mid.innerText;
   if (v1 === v2 && v2 === v3) {
     showMessage("JACKPOT! + 50 RON!");
     updateBalance(balance + 50);
@@ -81,10 +79,9 @@ function checkWin(v1, v2, v3) {
   }
   isSpinning = false;
   if (balance < 10) {
-    function warnFunds() {
+    setTimeout(() => {
       showMessage("OUT OF FUNDS!");
-    }
-    setTimeout(warnFunds, 1000);
+    }, 1000);
   } else {
     document.getElementById("spinBtn").disabled = false;
   }

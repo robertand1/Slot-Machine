@@ -7,28 +7,31 @@ const reelState = {
     top: "r1-top",
     mid: "r1-mid",
     bot: "r1-bot",
-    duration: 1000,
+    duration: 2000,
     isLast: false,
-    delay: 50,
+    delay: 40,
     elapsed: 0,
+    isBraking: false,
   },
   r2: {
     top: "r2-top",
     mid: "r2-mid",
     bot: "r2-bot",
-    duration: 1500,
+    duration: 2600,
     isLast: false,
-    delay: 50,
+    delay: 40,
     elapsed: 0,
+    isBraking: false,
   },
   r3: {
     top: "r3-top",
     mid: "r3-mid",
     bot: "r3-bot",
-    duration: 2000,
+    duration: 3200,
     isLast: true,
-    delay: 50,
+    delay: 40,
     elapsed: 0,
+    isBraking: false,
   },
 };
 
@@ -55,11 +58,7 @@ function getReelElements() {
   };
 }
 
-function noFunds() {
-  showMessage("OUT OF FUNDS!");
-}
-
-function stopReel(reelId) {
+function applyCSSClass(reelId, newClass) {
   const state = reelState[reelId];
   const elements = [
     document.getElementById(state.top),
@@ -67,9 +66,13 @@ function stopReel(reelId) {
     document.getElementById(state.bot),
   ];
   elements.forEach((el) => {
-    el.classList.remove("reel-spin");
-    el.classList.add("reel-stop");
+    el.classList.remove("reel-spin", "reel-slow", "reel-stop");
+    el.classList.add(newClass);
   });
+}
+
+function handleNoFunds() {
+  showMessage("OUT OF FUNDS!");
 }
 
 function reelTick(reelId) {
@@ -81,13 +84,17 @@ function reelTick(reelId) {
   midEl.innerText = topEl.innerText;
   topEl.innerText = getRandomSymbol();
   state.elapsed += state.delay;
-  if (state.elapsed > state.duration - 500) {
-    state.delay += 20;
+  if (state.elapsed > state.duration - 1200) {
+    state.delay += 40;
+    if (!state.isBraking) {
+      state.isBraking = true;
+      applyCSSClass(reelId, "reel-slow");
+    }
   }
   if (state.elapsed < state.duration) {
     setTimeout(reelTick, state.delay, reelId);
   } else {
-    stopReel(reelId);
+    applyCSSClass(reelId, "reel-stop");
     if (state.isLast) {
       setTimeout(checkWin, 400);
     }
@@ -96,17 +103,10 @@ function reelTick(reelId) {
 
 function startReel(reelId) {
   const state = reelState[reelId];
-  const elements = [
-    document.getElementById(state.top),
-    document.getElementById(state.mid),
-    document.getElementById(state.bot),
-  ];
-  elements.forEach((el) => {
-    el.classList.remove("reel-stop");
-    el.classList.add("reel-spin");
-  });
-  state.delay = 50;
+  state.delay = 40;
   state.elapsed = 0;
+  state.isBraking = false;
+  applyCSSClass(reelId, "reel-spin");
   reelTick(reelId);
 }
 
@@ -136,7 +136,7 @@ function checkWin() {
   }
   isSpinning = false;
   if (balance < 10) {
-    setTimeout(noFunds, 1000);
+    setTimeout(handleNoFunds, 1000);
   } else {
     document.getElementById("spinBtn").disabled = false;
   }

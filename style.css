@@ -1,13 +1,26 @@
 .reel-spin {
-  animation: spinMotion 0.1s linear infinite;
+  animation: spinFast 0.08s linear infinite;
 }
 
-@keyframes spinMotion {
+@keyframes spinFast {
   0% {
     transform: translateY(-8px);
   }
   100% {
     transform: translateY(8px);
+  }
+}
+
+.reel-slow {
+  animation: spinSlow 0.25s linear infinite;
+}
+
+@keyframes spinSlow {
+  0% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(4px);
   }
 }
 

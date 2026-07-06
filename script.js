@@ -2,6 +2,36 @@ const symbols = ["🍒", "🍋", "🔔", "💎", "7️⃣"];
 let balance = 100;
 let isSpinning = false;
 
+const reelState = {
+  r1: {
+    top: "r1-top",
+    mid: "r1-mid",
+    bot: "r1-bot",
+    duration: 1000,
+    isLast: false,
+    delay: 50,
+    elapsed: 0,
+  },
+  r2: {
+    top: "r2-top",
+    mid: "r2-mid",
+    bot: "r2-bot",
+    duration: 1500,
+    isLast: false,
+    delay: 50,
+    elapsed: 0,
+  },
+  r3: {
+    top: "r3-top",
+    mid: "r3-mid",
+    bot: "r3-bot",
+    duration: 2000,
+    isLast: true,
+    delay: 50,
+    elapsed: 0,
+  },
+};
+
 function showMessage(text) {
   const statusEl = document.getElementById("status");
   statusEl.innerText = text;
@@ -19,16 +49,65 @@ function getRandomSymbol() {
 
 function getReelElements() {
   return {
-    r1Top: document.getElementById("r1-top"),
     r1Mid: document.getElementById("r1-mid"),
-    r1Bot: document.getElementById("r1-bot"),
-    r2Top: document.getElementById("r2-top"),
     r2Mid: document.getElementById("r2-mid"),
-    r2Bot: document.getElementById("r2-bot"),
-    r3Top: document.getElementById("r3-top"),
     r3Mid: document.getElementById("r3-mid"),
-    r3Bot: document.getElementById("r3-bot"),
   };
+}
+
+function noFunds() {
+  showMessage("OUT OF FUNDS!");
+}
+
+function stopReel(reelId) {
+  const state = reelState[reelId];
+  const elements = [
+    document.getElementById(state.top),
+    document.getElementById(state.mid),
+    document.getElementById(state.bot),
+  ];
+  elements.forEach((el) => {
+    el.classList.remove("reel-spin");
+    el.classList.add("reel-stop");
+  });
+}
+
+function reelTick(reelId) {
+  const state = reelState[reelId];
+  const topEl = document.getElementById(state.top);
+  const midEl = document.getElementById(state.mid);
+  const botEl = document.getElementById(state.bot);
+  botEl.innerText = midEl.innerText;
+  midEl.innerText = topEl.innerText;
+  topEl.innerText = getRandomSymbol();
+  state.elapsed += state.delay;
+  if (state.elapsed > state.duration - 500) {
+    state.delay += 20;
+  }
+  if (state.elapsed < state.duration) {
+    setTimeout(reelTick, state.delay, reelId);
+  } else {
+    stopReel(reelId);
+    if (state.isLast) {
+      setTimeout(checkWin, 400);
+    }
+  }
+}
+
+function startReel(reelId) {
+  const state = reelState[reelId];
+  const elements = [
+    document.getElementById(state.top),
+    document.getElementById(state.mid),
+    document.getElementById(state.bot),
+  ];
+  elements.forEach((el) => {
+    el.classList.remove("reel-stop");
+    el.classList.add("reel-spin");
+  });
+  state.delay = 50;
+  state.elapsed = 0;
+  reelTick(reelId);
 }
 
 function spin() {
@@ -39,31 +118,9 @@ function spin() {
   document.getElementById("spinBtn").disabled = true;
   showMessage("Spinning...");
   updateBalance(balance - 10);
-  const elements = getReelElements();
-  function animateReel(topEl, midEl, botEl, totalDuration, isLastReel) {
-    let currentDelay = 50;
-    let elapsedTime = 0;
-    function tick() {
-      botEl.innerText = midEl.innerText;
-      midEl.innerText = topEl.innerText;
-      topEl.innerText = getRandomSymbol();
-      elapsedTime += currentDelay;
-      if (elapsedTime > totalDuration - 500) {
-        currentDelay += 20;
-      }
-      if (elapsedTime < totalDuration) {
-        setTimeout(tick, currentDelay);
-      } else {
-        if (isLastReel) {
-          checkWin();
-        }
-      }
-    }
-    setTimeout(tick, currentDelay);
-  }
-  animateReel(elements.r1Top, elements.r1Mid, elements.r1Bot, 1000, false);
-  animateReel(elements.r2Top, elements.r2Mid, elements.r2Bot, 1500, false);
-  animateReel(elements.r3Top, elements.r3Mid, elements.r3Bot, 2000, true);
+  startReel("r1");
+  startReel("r2");
+  startReel("r3");
 }
 
 function checkWin() {
@@ -79,9 +136,7 @@ function checkWin() {
   }
   isSpinning = false;
   if (balance < 10) {
-    setTimeout(() => {
-      showMessage("OUT OF FUNDS!");
-    }, 1000);
+    setTimeout(noFunds, 1000);
   } else {
     document.getElementById("spinBtn").disabled = false;
   }

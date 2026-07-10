@@ -41,9 +41,49 @@
     transform: translateY(-80px);
   }
   50% {
-    transform: translateY(-60px);
+    transform: translateY(-64px);
   }
   100% {
     transform: translateY(-80px);
   }
+}
+
+.reel-snap {
+  transition: none !important;
+  transform: translateY(-80px) !important;
+}
+
+.reel-slide {
+  transform: translateY(0px) !important;
+}
+
+.speed-40 {
+  transition: transform 40ms linear !important;
+}
+.speed-50 {
+  transition: transform 50ms linear !important;
+}
+.speed-70 {
+  transition: transform 70ms linear !important;
+}
+.speed-100 {
+  transition: transform 100ms ease-out !important;
+}
+.speed-150 {
+  transition: transform 150ms ease-out !important;
+}
+.speed-220 {
+  transition: transform 220ms ease-out !important;
+}
+.speed-310 {
+  transition: transform 310ms ease-out !important;
+}
+.speed-440 {
+  transition: transform 440ms ease-out !important;
+}
+.speed-600 {
+  transition: transform 600ms ease-out !important;
+}
+.speed-800 {
+  transition: transform 800ms ease-out !important;
 }

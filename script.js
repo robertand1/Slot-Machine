@@ -2,36 +2,38 @@ const symbols = ["🍒", "🍋", "🔔", "💎", "7️⃣"];
 let balance = 100;
 let isSpinning = false;
 
+const speedClasses = [40, 50, 70, 100, 150, 220, 310, 440, 600, 800];
+
 const reelState = {
   r1: {
     extra: "r1-extra",
     top: "r1-top",
     mid: "r1-mid",
     bot: "r1-bot",
-    duration: 2000,
+    maxFastTicks: 20,
+    currentTick: 0,
+    speedIndex: 0,
     isLast: false,
-    delay: 40,
-    elapsed: 0,
   },
   r2: {
     extra: "r2-extra",
     top: "r2-top",
     mid: "r2-mid",
     bot: "r2-bot",
-    duration: 2500,
+    maxFastTicks: 35,
+    currentTick: 0,
+    speedIndex: 0,
     isLast: false,
-    delay: 40,
-    elapsed: 0,
   },
   r3: {
     extra: "r3-extra",
     top: "r3-top",
     mid: "r3-mid",
     bot: "r3-bot",
-    duration: 3000,
+    maxFastTicks: 50,
+    currentTick: 0,
+    speedIndex: 0,
     isLast: true,
-    delay: 40,
-    elapsed: 0,
   },
 };
 
@@ -69,19 +71,22 @@ function reelTick(reelId) {
   const topEl = document.getElementById(state.top);
   const midEl = document.getElementById(state.mid);
   const botEl = document.getElementById(state.bot);
-  if (state.elapsed > 0) {
+  container.className = "reel-container reel-snap";
+  if (state.currentTick > 0) {
     botEl.innerText = midEl.innerText;
     midEl.innerText = topEl.innerText;
     topEl.innerText = extraEl.innerText;
   }
   extraEl.innerText = getRandomSymbol();
   void container.offsetWidth;
-  state.elapsed += state.delay;
-  if (state.elapsed > state.duration - 1200) {
-    state.delay += 40;
+  state.currentTick++;
+  if (state.currentTick > state.maxFastTicks) {
+    state.speedIndex++;
   }
-  if (state.elapsed < state.duration) {
-    setTimeout(reelTick, state.delay, reelId);
+  if (state.speedIndex < speedClasses.length) {
+    const currentSpeed = speedClasses[state.speedIndex];
+    container.className = `reel-container reel-slide speed-${currentSpeed}`;
+    setTimeout(reelTick, currentSpeed, reelId);
   } else {
     container.className = "reel-container reel-bounce";
     if (state.isLast) {
@@ -94,13 +99,15 @@ function startReel(reelId) {
   const state = reelState[reelId];
   const container = document.getElementById(reelId + "-container");
   container.className = "reel-container";
-  state.delay = 40;
-  state.elapsed = 0;
+  state.currentTick = 0;
+  state.speedIndex = 0;
   reelTick(reelId);
 }
 
 function spin() {
-  if (isSpinning || balance < 10) return;
+  if (isSpinning || balance < 10) {
+    return;
+  }
   isSpinning = true;
   document.getElementById("spinBtn").disabled = true;
   showMessage("Spinning...");
